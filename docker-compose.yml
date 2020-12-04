@@ -6,23 +6,18 @@ services:
            - ADMIN_PASSWORD=admin
         ports:
             - "8080:8080"
+            - "8181:8181"
             - "4848:4848"
-        entrypoint:
-            - /opt/payara41/bin/asadmin
-            - start-domain
-            - -v
         volumes:
           # application to deploy at startup
-            - "./data/payara/deployments:/opt/payara41/deployments"
-          # autodeploy (discouraged : no parameters, needs write access)
-            - "./data/payara/autodeploy:/opt/payara41/glassfish/domains/domain1/autodeploy"
-            
-            - "./payara-init.sh:/usr/local/bin/payara-init.sh"
+            - "./data/payara/deployments:/opt/payara/deployments"
         depends_on:
             - db
 
     db:
-        image: postgres
+        image: postgres:13.1-alpine
+        ports:
+          - "5432:5432"
         environment:
             POSTGRES_PASSWORD: glassfishdbpassword
             POSTGRES_USER: glassfish

@@ -1,22 +1,22 @@
-FROM payara/server-full:173
+FROM payara/server-full:5.2020.6-jdk11
 #Allows autodeploy
-RUN chown payara:payara /opt/payara41/glassfish/domains/domain1/autodeploy
+RUN chown payara:payara $DEPLOY_DIR
 #installs postgresql jdbc driver
 #and adds a jdbc connection pool and ressource
-RUN wget https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar \
-         -O /opt/payara41/glassfish/domains/domain1/lib/postgresql.jar && \
-    /opt/payara41/bin/asadmin start-domain && \
-    /opt/payara41/bin/asadmin --user admin \
-    			      --passwordfile=/opt/pwdfile \
-    			      set-hazelcast-configuration --enabled=true --dynamic=true && \
-    /opt/payara41/bin/asadmin --user admin \
-                              --passwordfile=/opt/pwdfile \
+ADD https://jdbc.postgresql.org/download/postgresql-42.2.18.jar /opt/payara/appserver/glassfish/lib/postgresql.jar  
+
+RUN asadmin start-domain && \
+    asadmin --user admin \
+       				 --passwordfile=$PASSWORD_FILE \
+    				 set-hazelcast-configuration --enabled=true --dynamic=true &&\
+    asadmin --user admin \
+                              --passwordfile=$PASSWORD_FILE \
 			       create-jdbc-connection-pool \
 			        --datasourceclassname org.postgresql.ds.PGConnectionPoolDataSource  \
 			        --restype javax.sql.ConnectionPoolDataSource \
 				--property portNumber=5432:password=glassfishdbpassword:user=glassfish:serverName=db:databaseName=glassfish \
 				postgres-pool && \
-    /opt/payara41/bin/asadmin --user admin \                                                                                           
-                              --passwordfile=/opt/pwdfile \
+    asadmin --user admin \                                                                                           
+                              --passwordfile=$PASSWORD_FILE \
 			       create-jdbc-resource --connectionpoolid postgres-pool jdbc/postgres-pool && \
-    /opt/payara41/bin/asadmin stop-domain
+    asadmin stop-domain
